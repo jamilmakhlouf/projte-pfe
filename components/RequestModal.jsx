@@ -33,30 +33,23 @@ export default function ApplyModal({ internship, onClose }) {
     try {
       const currentUser = auth.currentUser;
       const timestamp = Date.now();
-      const uniqueFileName = `${timestamp}_${cvFile.name}`;
+      const uniqueFileName = `${currentUser.uid}_${timestamp}_${cvFile.name}`;
+      const filePath = `public_cv_uploads/${uniqueFileName}`; // ✅ مسار جديد مشترك
 
-      // إنشاء المرجع للملف في Firebase Storage
-      const storageRef = ref(storage, `requests/${currentUser.uid}/${uniqueFileName}`);
-
-      // رفع الملف مع uploadBytesResumable
+      const storageRef = ref(storage, filePath);
       const uploadTask = uploadBytesResumable(storageRef, cvFile);
 
-      // ننتظر حتى يكتمل الرفع
       uploadTask.on(
         "state_changed",
-        (snapshot) => {
-          // يمكنك عرض Progress إذا تحب هنا
-        },
+        null,
         (error) => {
           console.error("❌ خطأ أثناء رفع الملف:", error);
           setError("حدث خطأ أثناء رفع السيرة الذاتية.");
           setLoading(false);
         },
         async () => {
-          // بعد ما يكتمل الرفع بنجاح
-          const cvUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
-          // تحضير بيانات الطلب
           const requestData = {
             internshipId: internship.id,
             internshipTitle: internship.title || "بدون عنوان",
@@ -69,14 +62,12 @@ export default function ApplyModal({ internship, onClose }) {
             status: "Pending",
             createdAt: new Date(),
             cvFileName: uniqueFileName,
-            cvUrl,
+            cvUrl: downloadURL,
           };
 
-          // حفظ الطلب للمستخدم
           const userRequestRef = doc(db, "users", currentUser.uid, "requests", internship.id);
           await setDoc(userRequestRef, requestData);
 
-          // حفظ الطلب للشركة
           const companyRequestRef = doc(db, "internships", internship.id, "requests", currentUser.uid);
           await setDoc(companyRequestRef, requestData);
 
@@ -88,8 +79,8 @@ export default function ApplyModal({ internship, onClose }) {
           setLoading(false);
         }
       );
-    } catch (error) {
-      console.error("❌ خطأ أثناء التقديم:", error);
+    } catch (err) {
+      console.error("❌ خطأ أثناء التقديم:", err);
       setError("حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.");
       setLoading(false);
     }
@@ -99,7 +90,7 @@ export default function ApplyModal({ internship, onClose }) {
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 text-black">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-indigo-600">📩  22 تقديم طلب</h2>
+          <h2 className="text-2xl font-bold text-indigo-600">📩 تقديم طلب</h2>
           <button onClick={onClose} className="text-red-500 hover:text-red-700 text-2xl">&times;</button>
         </div>
 

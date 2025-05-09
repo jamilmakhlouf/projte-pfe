@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NEXT_USE_TURBOPACK=false next dev",
+    "dev": "next dev -H  192.168.43.143 -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

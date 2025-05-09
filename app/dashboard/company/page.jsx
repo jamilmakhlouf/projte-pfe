@@ -26,6 +26,7 @@ export default function CompanyDashboard() {
   const [selectedStudyType, setSelectedStudyType] = useState("");
   const [selectedSpecialization, setSelectedSpecialization] = useState("");
   const router = useRouter();
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const studyTypes = ["انفو", "مكانيك", "إلكتريك", "جيني سيفيل", "إدارة أعمال"];
   const specializations = {
@@ -110,19 +111,40 @@ export default function CompanyDashboard() {
     router.push("/signin");
   };
 
+  const renderInternships = () => {
+    if (filteredInternships.length === 0) {
+      return <p className="text-center text-gray-400 mt-6">لا توجد عروض تربص حالياً.</p>;
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredInternships.map((internship) => (
+          <InternshipCard
+            key={internship.id}
+            internship={internship}
+            onEdit={handleEditInternship}
+            onDelete={handleDeleteInternship}
+            onDetails={(intern) => console.log("عرض التفاصيل:", intern)}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white mt-10">
       <Navbar />
 
       <div className="max-w-6xl mx-auto mt-10 p-6 flex justify-between items-center">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 px-4 py-2 rounded-md"
-        >
-          إضافة تربص
-        </button>
-        
-      </div>
+  <button
+    onClick={() => setIsFormOpen(true)}
+    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition duration-300"
+  >
+    ➕ إضافة تربص جديد
+  </button>
+
+  <InternshipModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
+</div>
 
       {/* فلاتر الشركات */}
       <div className="max-w-6xl mx-auto mt-4 p-4">
@@ -157,7 +179,7 @@ export default function CompanyDashboard() {
             onChange={(e) => setSelectedSpecialization(e.target.value)}
           >
             <option value="">اختار الشعبة</option>
-            {specializations[selectedStudyType].map((spec) => (
+            {specializations[selectedStudyType]?.map((spec) => (
               <option key={spec} value={spec}>
                 {spec}
               </option>
@@ -165,6 +187,9 @@ export default function CompanyDashboard() {
           </select>
         )}
       </div>
+
+      {/* عرض التربصات بعد تطبيق الفلاتر */}
+      {renderInternships()}
 
       {isModalOpen && (
         <InternshipModal
@@ -176,18 +201,6 @@ export default function CompanyDashboard() {
           internship={editingInternship}
         />
       )}
-
-      <div className="max-w-6xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredInternships.map((internship) => (
-          <InternshipCard
-            key={internship.id}
-            internship={internship}
-            onEdit={handleEditInternship}
-            onDelete={handleDeleteInternship}
-            onDetails={(intern) => console.log("عرض التفاصيل:", intern)}
-          />
-        ))}
-      </div>
     </div>
   );
 }

@@ -1,9 +1,11 @@
 [
   {
-    "origin": ["http://192.168.43.143:3000"],
-    "method": ["GET", "POST", "OPTIONS"],
-    "maxAgeSeconds": 3600
+    "origin": ["*"],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin"]
   }
 ]
+
 
   
